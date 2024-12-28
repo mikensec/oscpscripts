@@ -34,6 +34,8 @@ Troubleshooting
 """
 
 from flask import Flask, request
+import base64
+import os
 
 # Create a Flask application instance
 app = Flask(__name__)
@@ -43,11 +45,39 @@ def upload_file():
     """
     Endpoint to handle file uploads.
 
-    The uploaded file will be saved to the same directory where this script is running.
+    This method saves the uploaded file in binary mode to prevent corruption.
     """
-    file = request.files['file']  # Get the file from the HTTP POST request
-    file.save(f"./{file.filename}")  # Save the file in the current directory
-    return f"File {file.filename} uploaded successfully"
+    # Get the file from the HTTP POST request
+    file = request.files.get('file')
+    if not file:
+        return "No file part in the request", 400
+
+    # Save the file in binary mode
+    try:
+        file.save(os.path.join("./", file.filename))
+        return f"File {file.filename} uploaded successfully"
+    except Exception as e:
+        return f"Error saving file: {str(e)}", 500
+
+@app.route('/upload-base64', methods=['POST'])
+def upload_file_base64():
+    """
+    Endpoint to handle Base64-encoded file uploads.
+
+    The uploaded file is decoded from Base64 and saved to the current directory.
+    """
+    data = request.json.get('file')
+    if not data:
+        return "No file data in the request", 400
+
+    try:
+        file_content = base64.b64decode(data)
+        filename = request.json.get('filename', 'uploaded_file')
+        with open(filename, "wb") as f:
+            f.write(file_content)
+        return f"File {filename} uploaded and decoded successfully"
+    except Exception as e:
+        return f"Error decoding or saving file: {str(e)}", 500
 
 if __name__ == "__main__":
     """
